@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const empServiceUrl = import.meta.env.VITE_EMP_SERVICE_URL
+const empServiceUrl = import.meta.env.VITE_BACKEND_APP
 
 // add function
 async function add(employeeData) {

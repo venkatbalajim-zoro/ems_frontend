@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const authServiceUrl = import.meta.env.VITE_AUTH_SERVICE_URL
+const authServiceUrl = import.meta.env.VITE_BACKEND_APP
 
 // login function
 async function login(username, password) {

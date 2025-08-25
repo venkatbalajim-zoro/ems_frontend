@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const deptServiceUrl = import.meta.env.VITE_DEPT_SERVICE_URL
+const deptServiceUrl = import.meta.env.VITE_BACKEND_APP
 
 // add function
 async function add(id, name) {
