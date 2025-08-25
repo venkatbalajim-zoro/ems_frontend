@@ -1,0 +1,10 @@
+services:
+  ems_frontend:
+    build: .
+    container_name: ems-frontend
+    env_file:
+      - .env
+    ports:
+      - "3000:80"
+    image: venkatbalajimadheswaran/ems-frontend:latest
+    restart: always
