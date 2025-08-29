@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Button from '../components/button'
+import Snackbar from "../components/snack_bar"
 import { downloadDeptCSV, read, remove } from "../services/department_service"
 
 function DepartmentsPage() {
   const navigate = useNavigate()
   const [departments, setDepartments] = useState([])
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     async function fetchDepartments() {
@@ -93,7 +96,11 @@ function DepartmentsPage() {
     try {
       await remove(deptId)
       setDepartments(departments.filter((dept) => dept.id !== deptId))
+      setSnackbarMessage("Department data deleted successfully.")
+      setSnackbarOpen(true)
     } catch (error) {
+      setSnackbarMessage(error.message)
+      setSnackbarOpen(true)
       console.error("Failed to delete account:", error);
     }
   }
@@ -109,7 +116,7 @@ function DepartmentsPage() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Departments Page</h1>
+        <h1 style={styles.title}>Departments</h1>
         <div style={styles.buttonGroup}>
           <Button name="Add" color="#2392fa" onClick={() => {navigate('/add-department')}} />
           <Button name="Upload CSV" color="#2392fa" onClick={() => {navigate('/upload-csv')}} />
@@ -148,6 +155,14 @@ function DepartmentsPage() {
           ))}
         </tbody>
       </table>
+
+      <Snackbar 
+          isVisible={snackbarOpen}
+          message={snackbarMessage} 
+          onClose={() => {
+              setSnackbarOpen(false)
+          }} 
+      />
     </div>
   )
 }

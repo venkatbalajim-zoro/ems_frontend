@@ -2,8 +2,8 @@ import React, { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import Button from '../components/button'
 import Snackbar from '../components/snack_bar'
-import { uploadDeptCSV } from "../services/department_service";
-import { uploadEmpCSV } from "../services/employee_service";
+import { downloadDeptTemplate, uploadDeptCSV } from "../services/department_service";
+import { downloadEmpTemplate, uploadEmpCSV } from "../services/employee_service";
 
 function UploadCSVPage() {
     const { state } = useLocation()
@@ -82,6 +82,20 @@ function UploadCSVPage() {
         }
     }
 
+    async function handleDownload() {
+        try {
+            if (group === "departments") {
+                await downloadDeptTemplate()
+            } else {
+                await downloadEmpTemplate()
+            }
+            setSnackbarMessage("Template downloaded successfully!");
+            setSnackbarOpen(true);
+        } catch (error) {
+            console.error("Failed to download the CSV file: ", error)
+        }
+    }
+
     return (
         <div style={styles.page}>
             <h1>Upload CSV File</h1>
@@ -100,6 +114,7 @@ function UploadCSVPage() {
                     <span style={styles.fileName}>{file ? `${file.name}` : "No file uploaded"}</span>
                 </div>
             </div>
+            <Button name="Download template" color="#2392fa" onClick={handleDownload} />
             <Button name={loading ? "Uploading ..." : "Upload"} color="#2392fa" onClick={handleSubmit} />
             
             <Snackbar 

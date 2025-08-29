@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { read, remove } from "../services/auth_service"; 
 import Button from '../components/button'
+import Snackbar from "../components/snack_bar";
 
 function AccountsPage() {
   const navigate = useNavigate()
 
   const [accounts, setAccounts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const styles = {
     page: {
@@ -60,7 +63,11 @@ function AccountsPage() {
     try {
       await remove(username);
       setAccounts(accounts.filter((acc) => acc.username !== username));
+      setSnackbarMessage("Account data deleted successfully.")
+      setSnackbarOpen(true)
     } catch (error) {
+      setSnackbarMessage(error.message)
+      setSnackbarOpen(true)
       console.error("Failed to delete account:", error);
     }
   };
@@ -68,7 +75,7 @@ function AccountsPage() {
   return (
     <div style={styles.page}>
       <div style={styles.header}>
-        <h1>Accounts Page</h1>
+        <h1>Accounts</h1>
         <div style={styles.buttonContainer}>
           <Button name="Register" color="#2392fa" onClick={() => {navigate("/register")}} />
           <Button name="Recovery" color="#2392fa" onClick={() => {navigate("/recover")}} />
@@ -99,6 +106,14 @@ function AccountsPage() {
           </tbody>
         </table>
       )}
+
+      <Snackbar 
+          isVisible={snackbarOpen}
+          message={snackbarMessage} 
+          onClose={() => {
+              setSnackbarOpen(false)
+          }} 
+      />
     </div>
   );
 }

@@ -116,6 +116,35 @@ async function downloadDeptCSV() {
     }
 }
 
+// download template function
+async function downloadDeptTemplate() {
+    try {
+        const response = await axios.get(
+            `${deptServiceUrl}/departments/download-template`,
+            {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("authToken")}` },
+                responseType: "blob"
+            }
+        )
+
+        const blob = new Blob([response.data], { type: "text/csv" })
+        const url = window.URL.createObjectURL(blob)
+
+        const link = document.createElement("a")
+        link.href = url
+        link.setAttribute("download", "departments-template.csv")
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    } catch (error) {
+        if (error.response && error.response.data.error) {
+            throw new Error(error.response.data.error)
+        } else {
+            throw new Error("An unexpected error occurred.")
+        }
+    }
+}
+
 // upload csv function
 async function uploadDeptCSV(file) {
   try {
@@ -142,4 +171,4 @@ async function uploadDeptCSV(file) {
   }
 }
 
-export {read, remove, add, update, downloadDeptCSV, uploadDeptCSV}
+export {read, remove, add, update, downloadDeptCSV, uploadDeptCSV, downloadDeptTemplate}

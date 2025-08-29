@@ -54,6 +54,24 @@ async function checkAuthentication() {
     }
 }
 
+// fetching logged username
+async function fetchUsername() {
+    try {
+        const response = await axios.get(`${authServiceUrl}/auth/check`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("authToken")}`
+            }
+        })
+        return response.data.data
+    } catch (error) {
+        if (error.response && error.response.data) {
+            throw new Error(error.response.data.error)
+        } else {
+            throw new Error("An unexpected error occurred.")
+        }
+    }
+}
+
 // remove function
 async function remove(username) {
     try {
@@ -157,4 +175,4 @@ async function deleteAccount(navigate) {
     }
 }
 
-export { login, useLogout, checkAuthentication, remove, read, recovery, register, deleteAccount }
+export { login, useLogout, checkAuthentication, remove, read, recovery, register, deleteAccount, fetchUsername }

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"
 import Button from '../components/button'
+import Snackbar from "../components/snack_bar";
 import { downloadEmpCSV, read, remove } from "../services/employee_service";
 
 function EmployeesPage() {
     const navigate = useNavigate()
     const [employees, setEmployees] = useState([])
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
     useEffect(() => {
         async function fetchEmployees() {
@@ -93,15 +96,18 @@ function EmployeesPage() {
         try {
             await remove(employeeId)
             setEmployees(employees.filter((emp) => emp.employee_id !== employeeId))
+            setSnackbarMessage("Employee data deleted successfully.")
         } catch (error) {
+            setSnackbarMessage(error.message)
             console.error("Failed to delete the employee data: ", error)
         }
+        setSnackbarOpen(true)
     }
 
     return (
         <div style={styles.container}>
             <div style={styles.header}>
-                <h1 style={styles.title}>Employees Page</h1>
+                <h1 style={styles.title}>Employees</h1>
                 <div style={styles.buttonGroup}>
                     <Button name="Add" color="#2392fa" onClick={() => {navigate('/add-employee')}} />
                     <Button name="Upload CSV" color="#2392fa" onClick={() => {navigate('/upload-csv', {
@@ -121,11 +127,8 @@ function EmployeesPage() {
                     <th style={styles.th}>Last Name</th>
                     <th style={styles.th}>Email ID</th>
                     <th style={styles.th}>Phone</th>
-                    <th style={styles.th}>Gender</th>
-                    <th style={styles.th}>Dept ID</th>
+                    <th style={styles.th}>Dept Name</th>
                     <th style={styles.th}>Designation</th>
-                    <th style={styles.th}>Salary</th>
-                    <th style={styles.th}>Hire Date</th>
                     <th style={styles.th}>Actions</th>
                 </tr>
                 </thead>
@@ -137,11 +140,8 @@ function EmployeesPage() {
                     <td style={styles.td}>{emp.last_name}</td>
                     <td style={styles.td}>{emp.email}</td>
                     <td style={styles.td}>{emp.phone}</td>
-                    <td style={styles.td}>{emp.gender}</td>
-                    <td style={styles.td}>{emp.department_id === 0 ? 'NIL' : emp.department_id}</td>
+                    <td style={styles.td}>{emp.department_name}</td>
                     <td style={styles.td}>{emp.designation}</td>
-                    <td style={styles.td}>{emp.salary}</td>
-                    <td style={styles.td}>{emp.hire_date}</td>
                     <td style={styles.td}>
                         <div style={styles.actions}>
                         <Button name="Update" color="#2392fa" onClick={() => {navigate('/update-employee', {
@@ -157,6 +157,14 @@ function EmployeesPage() {
                 ))}
                 </tbody>
             </table>
+
+            <Snackbar 
+                isVisible={snackbarOpen}
+                message={snackbarMessage} 
+                onClose={() => {
+                    setSnackbarOpen(false)
+                }} 
+            />
         </div>
     );
 }

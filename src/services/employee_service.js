@@ -137,4 +137,33 @@ async function downloadEmpCSV() {
     }
 }
 
-export {read, remove, add, update, uploadEmpCSV, downloadEmpCSV}
+// download template function
+async function downloadEmpTemplate() {
+    try {
+        const response = await axios.get(
+            `${empServiceUrl}/employees/download-template`,
+            {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("authToken")}` },
+                responseType: "blob"
+            }
+        )
+
+        const blob = new Blob([response.data], { type: "text/csv" })
+        const url = window.URL.createObjectURL(blob)
+
+        const link = document.createElement("a")
+        link.href = url
+        link.setAttribute("download", "employees-template.csv")
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    } catch (error) {
+        if (error.response && error.response.data.error) {
+            throw new Error(error.response.data.error)
+        } else {
+            throw new Error("An unexpected error occurred.")
+        }
+    }
+}
+
+export {read, remove, add, update, uploadEmpCSV, downloadEmpCSV, downloadEmpTemplate}
