@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import TextField from "../components/input_field";
 import Button from "../components/button";
 import { add, update } from "../services/employee_service";
+import { read } from "../services/department_service";
 import Snackbar from "../components/snack_bar";
 
 function AddEmployeePage() {
@@ -17,10 +18,24 @@ function AddEmployeePage() {
     const [designation, setDesignation] = useState(state?.designation || "")
     const [salary, setSalary] = useState(state?.salary || "")
     const [hireDate, setHireDate] = useState(state?.hire_date || "")
+    const [dept, setDept] = useState([])
 
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const [snackMsg, setSnackMsg] = useState("")
+
+    useEffect(() => {
+        async function fetchData() {
+            const data = await read()
+            setDept(data)
+            if (!deptId && data.length > 0) {
+                setDeptId(data[0].department_id.toString());
+            }
+        }
+
+        fetchData()
+    // eslint-disable-next-line
+    }, [])
 
     const styles = {
         page: {
@@ -154,12 +169,21 @@ function AddEmployeePage() {
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                         />
-                        <TextField
-                            type="number"
-                            label="Department ID"
-                            value={deptId}
-                            onChange={(e) => setDeptId(e.target.value)}
-                        />
+                        <div>
+                            <label style={styles.label}>Department</label>
+                            <br />
+                            <select
+                                value={deptId}
+                                onChange={e => setDeptId(e.target.value)}
+                                style={styles.dropdown}
+                            >
+                                {dept.map((d) => (
+                                    <option key={d.id} value={d.id}>
+                                        {`${d.id} - ${d.name}`}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <TextField
                             type="text"
                             label="Designation"

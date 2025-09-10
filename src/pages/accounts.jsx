@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { read, remove } from "../services/auth_service"; 
 import Button from '../components/button'
 import Snackbar from "../components/snack_bar";
+import ConfirmDialog from "../components/confirm_dialog"
 
 function AccountsPage() {
   const navigate = useNavigate()
@@ -11,6 +12,8 @@ function AccountsPage() {
   const [loading, setLoading] = useState(true)
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedUsername, setSelectedUsername] = useState(null);
 
   const styles = {
     page: {
@@ -59,6 +62,19 @@ function AccountsPage() {
     fetchAccounts();
   }, []);
 
+  function askDelete(username) {
+      setSelectedUsername(username);
+      setConfirmOpen(true);
+  }
+
+  async function confirmDelete() {
+      if (selectedUsername) {
+          await handleDelete(selectedUsername);
+          setSelectedUsername(null);
+      }
+      setConfirmOpen(false);
+  }
+
   async function handleDelete(username) {
     try {
       await remove(username);
@@ -99,13 +115,20 @@ function AccountsPage() {
                 <td style={styles.thTd}>{account.username}</td>
                 <td style={styles.thTd}>{account.employee_id}</td>
                 <td style={styles.thTd}>
-                  <Button name="Delete" color="#d64b4b" onClick={() => {handleDelete(account.username)}} />
+                  <Button name="Delete" color="#d64b4b" onClick={() => askDelete(account.username)} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
+
+      <ConfirmDialog 
+          isOpen={confirmOpen}
+          message="Are you sure to delete?"
+          onConfirm={confirmDelete}
+          onCancel={() => setConfirmOpen(false)}
+      />
 
       <Snackbar 
           isVisible={snackbarOpen}

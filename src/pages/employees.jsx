@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"
 import Button from '../components/button'
 import Snackbar from "../components/snack_bar";
+import ConfirmDialog from "../components/confirm_dialog"
 import { downloadEmpCSV, read, remove } from "../services/employee_service";
 
 function EmployeesPage() {
@@ -9,12 +10,16 @@ function EmployeesPage() {
     const [employees, setEmployees] = useState([])
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+    const [id, setId] = useState("")
 
     useEffect(() => {
         async function fetchEmployees() {
             try {
-                const data = await read()
-                setEmployees(data)
+                const response = await read()
+                setId(response.employee_id)
+                setEmployees(response.data)
             } catch (error) {
                 console.error("Failed to fetch the employees data: ", error)
             }
@@ -92,16 +97,34 @@ function EmployeesPage() {
         }
     }
 
+    function askDelete(employeeId) {
+        setSelectedEmployeeId(employeeId);
+        setConfirmOpen(true);
+    }
+
+    async function confirmDelete() {
+        if (selectedEmployeeId) {
+            await handleDelete(selectedEmployeeId);
+            setSelectedEmployeeId(null);
+        }
+        setConfirmOpen(false);
+    }
+
     async function handleDelete(employeeId) {
         try {
-            await remove(employeeId)
-            setEmployees(employees.filter((emp) => emp.employee_id !== employeeId))
-            setSnackbarMessage("Employee data deleted successfully.")
+            if (employeeId === id) {
+                setSnackbarMessage("Unable to delete your own data.")
+            } else {
+                await remove(employeeId)
+                setEmployees(employees.filter((emp) => emp.employee_id !== employeeId))
+                setSnackbarMessage("Employee data deleted successfully.")
+            }
         } catch (error) {
             setSnackbarMessage(error.message)
             console.error("Failed to delete the employee data: ", error)
+        } finally {
+            setSnackbarOpen(true)
         }
-        setSnackbarOpen(true)
     }
 
     return (
@@ -150,13 +173,20 @@ function EmployeesPage() {
                                 page: "update"
                             }
                         })}} />
-                        <Button name="Delete" color="#d64b4b" onClick={() => {handleDelete(emp.employee_id)}} />
+                        <Button name="Delete" color="#d64b4b" onClick={() => askDelete(emp.employee_id)} />
                         </div>
                     </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
+
+            <ConfirmDialog 
+                isOpen={confirmOpen}
+                message="Are you sure to delete?"
+                onConfirm={confirmDelete}
+                onCancel={() => setConfirmOpen(false)}
+            />
 
             <Snackbar 
                 isVisible={snackbarOpen}
