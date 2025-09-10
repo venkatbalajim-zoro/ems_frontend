@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Button from '../components/button'
 import Snackbar from "../components/snack_bar"
+import ConfirmDialog from "../components/confirm_dialog"
 import { downloadDeptCSV, read, remove } from "../services/department_service"
 
 function DepartmentsPage() {
@@ -9,6 +10,8 @@ function DepartmentsPage() {
   const [departments, setDepartments] = useState([])
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
   useEffect(() => {
     async function fetchDepartments() {
@@ -92,6 +95,19 @@ function DepartmentsPage() {
     }
   }
 
+  function askDelete(employeeId) {
+      setSelectedEmployeeId(employeeId);
+      setConfirmOpen(true);
+  }
+
+  async function confirmDelete() {
+      if (selectedEmployeeId) {
+          await handleDelete(selectedEmployeeId);
+          setSelectedEmployeeId(null);
+      }
+      setConfirmOpen(false);
+  }
+
   async function handleDelete(deptId) {
     try {
       await remove(deptId)
@@ -148,13 +164,20 @@ function DepartmentsPage() {
                       }
                     })
                   }} />
-                  <Button name="Delete" color="#d64b4b" onClick={() => {handleDelete(dept.id)}} />
+                  <Button name="Delete" color="#d64b4b" onClick={() => askDelete(dept.id)} />
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <ConfirmDialog 
+          isOpen={confirmOpen}
+          message="Are you sure to delete?"
+          onConfirm={confirmDelete}
+          onCancel={() => setConfirmOpen(false)}
+      />
 
       <Snackbar 
           isVisible={snackbarOpen}

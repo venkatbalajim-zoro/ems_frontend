@@ -51,7 +51,7 @@ async function read() {
         const response = await axios.get(`${empServiceUrl}/employees/read`, {
             headers: { "Authorization": `Bearer ${localStorage.getItem("authToken")}` }
         })
-        return response.data.data
+        return response.data
     } catch (error) {
         if (error.response && error.response.data.error) {
             throw new Error(error.response.data.error)
